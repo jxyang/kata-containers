@@ -1,0 +1,11 @@
+#!/bin/bash
+args=("$@")
+# find index of CPU argument
+for i in "${!args[@]}"; do
+    if [[ "${args[$i]}" == "-cpu" ]]; then
+        idx=$(($i+1))
+    fi
+done
+# "host" -> "EPYC-v3"
+args[$idx]=$(echo "${args[$idx]}" | sed "s/host/EPYC-v3/g")
+exec /opt/kata/bin/qemu-system-x86_64-orig "${args[@]}"
