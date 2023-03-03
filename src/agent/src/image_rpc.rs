@@ -132,6 +132,10 @@ impl ImageService {
 
         info!(sl!(), "unpack image {:?} to {:?}", cid, target_path_bundle);
 
+        // See https://github.com/kata-containers/kata-containers/pull/5604
+        // for details
+        let _ = fs::remove_dir_all(&target_path_bundle);
+
         // Unpack image
         let status: ExitStatus = Command::new(UMOCI_PATH)
             .arg("unpack")
@@ -245,7 +249,9 @@ impl ImageService {
             return Ok(image.to_owned());
         }
 
-        let aa_kbc_params = &AGENT_CONFIG.read().await.aa_kbc_params;
+        // Use AASP for image decryption
+        // Assumed: both skopeo and aasp exist in guest image under /usr/bin/
+        let aa_kbc_params = "aasp";
         if !aa_kbc_params.is_empty() {
             match self.attestation_agent_started.compare_exchange_weak(
                 false,
